@@ -80,11 +80,7 @@ def run_bot():
     nest_asyncio.apply()
     try:
         loop = asyncio.get_event_loop()
-        if loop.is_running():
-            loop.create_task(main())
-            logger.info("Bot agendado no event loop já em execução.")
-        else:
-            loop.run_until_complete(main())
+        loop.run_until_complete(main())
     except KeyboardInterrupt:
         logger.info("Bot interrompido pelo usuário")
     except Exception as e:
