@@ -75,6 +75,7 @@ def run_bot():
         loop = asyncio.get_event_loop()
         if loop.is_running():
             loop.create_task(main())
+            loop.run_forever()
         else:
             loop.run_until_complete(main())
     except KeyboardInterrupt:
