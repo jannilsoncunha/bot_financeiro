@@ -57,7 +57,7 @@ async def main():
         # Executa o bot
         await application.initialize()
         await application.start()
-        await application.updater.start_polling()
+        await application.run_polling()
         
         # Mantém o programa rodando
         while True:
@@ -75,9 +75,7 @@ async def main():
         notification_manager.stop_scheduler()
         
         # Para o bot
-        await application.updater.stop()
-        await application.stop()
-        await application.shutdown()
+        
         
         logger.info("Bot parado com sucesso!")
 
