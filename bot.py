@@ -599,11 +599,4 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
         return application
 
 
-async def main():
-    """Função principal assíncrona."""
-    bot_manager = FinanceBotManager()
-    application = bot_manager.create_application()
-    logger.info("Bot iniciado!")
-    await application.run_polling(stop_signals=None)
-
 
