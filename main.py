@@ -42,9 +42,9 @@ async def main():
     notification_manager = NotificationManager(bot_token, mongodb_uri)
     notification_manager.start_scheduler()
 
-    # Inicializa o bot
-    bot_manager = FinanceBotManager()
-    application = bot_manager.create_application()
+# Inicializa o bot
+bot_manager = FinanceBotManager()
+application = bot_manager.create_application()
 
 # Inicia keep-alive em background (opcional, se necessário)
 keep_alive_task = asyncio.create_task(start_keep_alive())
@@ -89,9 +89,7 @@ def run_bot():
     nest_asyncio.apply()
 
     try:
-        loop = asyncio.get_event_loop()
-        loop.create_task(main())
-        loop.run_forever()
+        asyncio.run(main())
     except KeyboardInterrupt:
         logger.info("Bot interrompido pelo usuário")
     except Exception as e:
