@@ -75,19 +75,32 @@ async def main():
         logger.info("Bot parado com sucesso!")
 
 
+
 def run_bot():
     """
     Função para executar o bot (compatível com diferentes ambientes).
     """
     import nest_asyncio
+    import asyncio
+    import sys
+
     nest_asyncio.apply()
+
     try:
+        if sys.platform == "win32":
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(main())
+        if loop.is_running():
+            # Se o loop já estiver rodando (como no Render), apenas cria a tarefa
+            loop.create_task(main())
+        else:
+            loop.run_until_complete(main())
     except KeyboardInterrupt:
         logger.info("Bot interrompido pelo usuário")
     except Exception as e:
         logger.error(f"Erro ao executar o bot: {e}")
+
 
 
 if __name__ == '__main__':
