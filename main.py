@@ -46,13 +46,17 @@ async def main():
     bot_manager = FinanceBotManager()
     application = bot_manager.create_application()
 
-    # Inicia keep-alive em background
+    # Inicia keep-alive em background (opcional, se necessário)
     keep_alive_task = asyncio.create_task(start_keep_alive())
 
     # Configuração do webhook
     webhook_url = os.getenv('WEBHOOK_URL')
-    port_str = os.getenv('PORT')
-    port = int(port_str) if port_str and port_str.isdigit() else 8443
+    port_str = os.getenv('PORT', '8443')
+    try:
+        port = int(port_str)
+    except ValueError:
+        logger.warning(f"PORT inválido: '{port_str}', usando 8443 como padrão.")
+        port = 8443
 
     if not webhook_url:
         logger.error("WEBHOOK_URL não configurado! Defina a URL pública do seu serviço Render.")
@@ -74,14 +78,11 @@ async def main():
         notification_manager.stop_scheduler()
         logger.info("Bot parado com sucesso!")
 
-
-
 def run_bot():
     """
     Função para executar o bot (compatível com diferentes ambientes).
     """
     import nest_asyncio
-    import asyncio
     import sys
 
     nest_asyncio.apply()
@@ -92,7 +93,7 @@ def run_bot():
 
         loop = asyncio.get_event_loop()
         if loop.is_running():
-            # Se o loop já estiver rodando (como no Render), apenas cria a tarefa
+            logger.info("Loop de eventos já está em execução. Adicionando main() como tarefa.")
             loop.create_task(main())
         else:
             loop.run_until_complete(main())
@@ -100,8 +101,6 @@ def run_bot():
         logger.info("Bot interrompido pelo usuário")
     except Exception as e:
         logger.error(f"Erro ao executar o bot: {e}")
-
-
 
 if __name__ == '__main__':
     run_bot()
