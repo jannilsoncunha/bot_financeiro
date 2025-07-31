@@ -51,7 +51,13 @@ async def main():
 
     # Configuração do webhook
     webhook_url = os.getenv('WEBHOOK_URL')
-    port_str = os.getenv('PORT', '8443')
+    port_str = os.getenv('PORT')
+try:
+    port = int(port_str) if port_str else 8443
+except ValueError:
+    logger.warning(f"PORT inválido: '{port_str}', usando 8443 como padrão.")
+    port = 8443
+
     try:
         port = int(port_str)
     except ValueError:
