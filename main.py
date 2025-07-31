@@ -80,25 +80,14 @@ def run_bot():
     Função para executar o bot (compatível com diferentes ambientes).
     """
     import nest_asyncio
-    import sys
-
     nest_asyncio.apply()
-
     try:
-        if sys.platform == "win32":
-            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
-        asyncio.run(main())
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(main())
     except KeyboardInterrupt:
         logger.info("Bot interrompido pelo usuário")
-    except RuntimeError as e:
-        if "cannot close a running event loop" in str(e).lower():
-            logger.warning("Loop de eventos já está em execução. Executando main() diretamente.")
-            loop = asyncio.get_event_loop()
-            loop.create_task(main())
-            loop.run_forever()
-        else:
-            logger.error(f"Erro ao executar o bot: {e}")
+    except Exception as e:
+        logger.error(f"Erro ao executar o bot: {e}")
 
 
 if __name__ == '__main__':
