@@ -608,16 +608,10 @@ async def main():
 
 if __name__ == '__main__':
     import sys
+    import nest_asyncio
+    nest_asyncio.apply()
     if sys.platform.startswith('win') and sys.version_info >= (3, 8):
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-    try:
-        asyncio.run(main())
-    except RuntimeError as e:
-        if 'event loop' in str(e):
-            import nest_asyncio
-            nest_asyncio.apply()
-            loop = asyncio.get_event_loop()
-            loop.run_until_complete(main())
-        else:
-            raise
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
 
