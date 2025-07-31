@@ -69,6 +69,8 @@ def run_bot():
     """
     Função para executar o bot (compatível com diferentes ambientes).
     """
+    import nest_asyncio
+    nest_asyncio.apply()
     try:
         loop = asyncio.get_event_loop()
         if loop.is_running():
