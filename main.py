@@ -49,16 +49,23 @@ async def main():
     # Inicia keep-alive em background
     keep_alive_task = asyncio.create_task(start_keep_alive())
 
+    # Configuração do webhook
+    webhook_url = os.getenv('WEBHOOK_URL')
+    port = int(os.getenv('PORT', 8443))
+    if not webhook_url:
+        logger.error("WEBHOOK_URL não configurado! Defina a URL pública do seu serviço Render.")
+        return
+
     try:
-        logger.info("Bot, notificações e keep-alive iniciados com sucesso!")
-        logger.info("Pressione Ctrl+C para parar...")
-
-        # Executa o bot com polling moderno
-        await application.run_polling()
-
+        logger.info(f"Iniciando bot em modo webhook na porta {port}...")
+        await application.run_webhook(
+            listen="0.0.0.0",
+            port=port,
+            webhook_url=webhook_url,
+            stop_signals=None
+        )
     except KeyboardInterrupt:
         logger.info("Parando o bot...")
-
     finally:
         stop_keep_alive()
         keep_alive_task.cancel()
