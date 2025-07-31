@@ -42,59 +42,57 @@ async def main():
     notification_manager = NotificationManager(bot_token, mongodb_uri)
     notification_manager.start_scheduler()
 
-# Inicializa o bot
-bot_manager = FinanceBotManager()
-application = bot_manager.create_application()
+    # Inicializa o bot
+    bot_manager = FinanceBotManager()
+    application = bot_manager.create_application()
 
-# Inicia keep-alive em background (opcional, se necessário)
-keep_alive_task = asyncio.create_task(start_keep_alive())
+    # Inicia keep-alive em background (opcional)
+    keep_alive_task = asyncio.create_task(start_keep_alive())
 
-# Configuração do webhook
-webhook_url = os.getenv('WEBHOOK_URL')
-port_str = os.getenv('PORT')
-try:
-    port = int(port_str) if port_str else 8443
-except ValueError:
-    logger.warning(f"PORT inválido: '{port_str}', usando 8443 como padrão.")
-    port = 8443
+    # Configuração do webhook
+    webhook_url = os.getenv('WEBHOOK_URL')
+    port_str = os.getenv('PORT')
+    try:
+        port = int(port_str) if port_str else 8443
+    except ValueError:
+        logger.warning(f"PORT inválido: '{port_str}', usando 8443 como padrão.")
+        port = 8443
 
-if not webhook_url:
-    logger.error("WEBHOOK_URL não configurado! Defina a URL pública do seu serviço Render.")
-    raise SystemExit("WEBHOOK_URL não configurado! Encerrando o programa.")
+    if not webhook_url:
+        logger.error("WEBHOOK_URL não configurado! Defina a URL pública do seu serviço Render.")
+        return
 
-try:
-    logger.info(f"Iniciando bot em modo webhook na porta {port}...")
-    await application.run_webhook(
-        listen="0.0.0.0",
-        port=port,
-        webhook_url=webhook_url,
-        stop_signals=None
-    )
-except KeyboardInterrupt:
-    logger.info("Parando o bot...")
-finally:
-    stop_keep_alive()
-    keep_alive_task.cancel()
-    notification_manager.stop_scheduler()
-    logger.info("Bot parado com sucesso!")
-
+    try:
+        logger.info(f"Iniciando bot em modo webhook na porta {port}...")
+        await application.run_webhook(
+            listen="0.0.0.0",
+            port=port,
+            webhook_url=webhook_url,
+            stop_signals=None
+        )
+    except KeyboardInterrupt:
+        logger.info("Parando o bot...")
+    finally:
+        stop_keep_alive()
+        keep_alive_task.cancel()
+        notification_manager.stop_scheduler()
+        logger.info("Bot parado com sucesso!")
 
 def run_bot():
     """
     Executa o bot de forma compatível com ambientes como Render.
     """
     import nest_asyncio
-    import asyncio
-
     nest_asyncio.apply()
 
     try:
-        asyncio.run(main())
+        loop = asyncio.get_event_loop()
+        loop.create_task(main())
+        loop.run_forever()
     except KeyboardInterrupt:
         logger.info("Bot interrompido pelo usuário")
     except Exception as e:
         logger.error(f"Erro ao executar o bot: {e}")
-
 
 if __name__ == '__main__':
     run_bot()
