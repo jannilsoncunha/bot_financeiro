@@ -82,7 +82,7 @@ def run_bot():
         loop = asyncio.get_event_loop()
         if loop.is_running():
             loop.create_task(main())
-            loop.run_forever()
+            logger.info("Bot agendado no event loop já em execução.")
         else:
             loop.run_until_complete(main())
     except KeyboardInterrupt:
