@@ -606,12 +606,4 @@ async def main():
     logger.info("Bot iniciado!")
     await application.run_polling(stop_signals=None)
 
-if __name__ == '__main__':
-    import sys
-    import nest_asyncio
-    nest_asyncio.apply()
-    if sys.platform.startswith('win') and sys.version_info >= (3, 8):
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
 
