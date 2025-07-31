@@ -51,7 +51,9 @@ async def main():
 
     # Configuração do webhook
     webhook_url = os.getenv('WEBHOOK_URL')
-    port = int(os.getenv('PORT', 8443))
+    port_str = os.getenv('PORT')
+    port = int(port_str) if port_str and port_str.isdigit() else 8443
+
     if not webhook_url:
         logger.error("WEBHOOK_URL não configurado! Defina a URL pública do seu serviço Render.")
         return
