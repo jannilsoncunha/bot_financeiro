@@ -4,6 +4,7 @@ Bot Telegram para Controle Financeiro Pessoal
 
 import os
 import logging
+import asyncio
 from datetime import datetime, date
 from typing import Dict, Any
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -597,14 +598,14 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
         
         return application
 
-def main():
-    """Função principal."""
+
+async def main():
+    """Função principal assíncrona."""
     bot_manager = FinanceBotManager()
     application = bot_manager.create_application()
-    
     logger.info("Bot iniciado!")
-    application.run_polling()
+    await application.run_polling(stop_signals=None)
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
 
