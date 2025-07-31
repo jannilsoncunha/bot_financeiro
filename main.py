@@ -46,8 +46,8 @@ async def main():
     bot_manager = FinanceBotManager()
     application = bot_manager.create_application()
 
-    # Inicia keep-alive em background (opcional, se necessário)
-    keep_alive_task = asyncio.create_task(start_keep_alive())
+# Inicia keep-alive em background (opcional, se necessário)
+keep_alive_task = asyncio.create_task(start_keep_alive())
 
 # Configuração do webhook
 webhook_url = os.getenv('WEBHOOK_URL')
@@ -60,7 +60,7 @@ except ValueError:
 
 if not webhook_url:
     logger.error("WEBHOOK_URL não configurado! Defina a URL pública do seu serviço Render.")
-    return
+    raise SystemExit("WEBHOOK_URL não configurado! Encerrando o programa.")
 
 try:
     logger.info(f"Iniciando bot em modo webhook na porta {port}...")
