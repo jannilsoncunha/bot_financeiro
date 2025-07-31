@@ -72,19 +72,32 @@ async def main():
         notification_manager.stop_scheduler()
         logger.info("Bot parado com sucesso!")
 
+
 def run_bot():
     """
     Função para executar o bot (compatível com diferentes ambientes).
     """
     import nest_asyncio
+    import sys
+
     nest_asyncio.apply()
+
     try:
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(main())
+        if sys.platform == "win32":
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+        asyncio.run(main())
     except KeyboardInterrupt:
         logger.info("Bot interrompido pelo usuário")
-    except Exception as e:
-        logger.error(f"Erro ao executar o bot: {e}")
+    except RuntimeError as e:
+        if "cannot close a running event loop" in str(e).lower():
+            logger.warning("Loop de eventos já está em execução. Executando main() diretamente.")
+            loop = asyncio.get_event_loop()
+            loop.create_task(main())
+            loop.run_forever()
+        else:
+            logger.error(f"Erro ao executar o bot: {e}")
+
 
 if __name__ == '__main__':
     run_bot()
