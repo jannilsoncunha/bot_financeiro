@@ -607,5 +607,8 @@ async def main():
     await application.run_polling(stop_signals=None)
 
 if __name__ == '__main__':
+    import sys
+    if sys.platform.startswith('win') and sys.version_info >= (3, 8):
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     asyncio.run(main())
 
