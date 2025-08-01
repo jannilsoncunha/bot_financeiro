@@ -86,8 +86,17 @@ def run_bot():
     nest_asyncio.apply()
 
     try:
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(main())
+        try:
+            asyncio.run(main())
+        except RuntimeError as e:
+            if "already running" in str(e):
+                import nest_asyncio
+                nest_asyncio.apply()
+                loop = asyncio.get_event_loop()
+                loop.create_task(main())
+                loop.run_forever()
+            else:
+                raise
     except KeyboardInterrupt:
         logger.info("Bot interrompido pelo usuário")
     except Exception as e:
