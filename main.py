@@ -88,5 +88,6 @@ def run_bot():
         logger.error(f"Erro ao executar o bot: {e}")
 
 
+
 if __name__ == '__main__':
     run_bot()
