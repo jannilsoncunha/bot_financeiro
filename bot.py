@@ -98,7 +98,7 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
 • Use categorias consistentes para melhor organização
 • Configure vencimentos para receber lembretes
 • Marque como "pago" para manter o controle atualizado
-        """
+
         
         await update.message.reply_text(help_text, parse_mode='Markdown')
     
