@@ -629,4 +629,4 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
         application.add_handler(despesa_handler)
         application.add_handler(pagar_handler)
         
-        return application"""
+        return application
