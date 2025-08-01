@@ -159,7 +159,7 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
             data_texto = update.message.text.lower()
             
             if data_texto == 'hoje':
-                data_receita = date.today().isoformat()
+                data_receita = date.today()
             else:
                 data_receita = datetime.strptime(data_texto, '%d/%m/%Y').date().isoformat()
             
@@ -257,7 +257,7 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
             data_texto = update.message.text.lower()
             
             if data_texto == 'hoje':
-                data_vencimento = date.today().isoformat()
+                data_vencimento = date.today()
             else:
                 data_vencimento = datetime.strptime(data_texto, '%d/%m/%Y').date().isoformat()
             
@@ -549,7 +549,7 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
     async def relatorio(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Gera relatório mensal."""
         user_id = update.effective_user.id
-        hoje = date.today().isoformat()
+        hoje = date.today()
         
         resumo = self.db.get_monthly_summary(user_id, hoje.year, hoje.month)
         
@@ -629,4 +629,5 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
         application.add_handler(despesa_handler)
         application.add_handler(pagar_handler)
         
-        return application"""
+        return application
+
