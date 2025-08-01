@@ -65,7 +65,7 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
     
     async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Comando /help - Exibe ajuda."""
-        help_text = """
+        help_text = 
 🆘 *Ajuda - Bot de Controle Financeiro*
 
 *Comandos principais:*
@@ -579,7 +579,7 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
         return ConversationHandler.END
     
     def create_application(self):
-        """Cria e configura a aplicação do bot.""
+        """Cria e configura a aplicação do bot."""
         application = Application.builder().token(os.getenv('TELEGRAM_BOT_TOKEN')).build()
         
         # Handlers de comando
