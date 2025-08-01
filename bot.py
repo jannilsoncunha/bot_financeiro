@@ -65,7 +65,7 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
     
     async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Comando /help - Exibe ajuda."""
-        help_text = 
+        help_text = """
 🆘 *Ajuda - Bot de Controle Financeiro*
 
 *Comandos principais:*
@@ -97,7 +97,7 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
 *Dicas:*
 • Use categorias consistentes para melhor organização
 • Configure vencimentos para receber lembretes
-• Marque como "pago" para manter o controle atualizado
+• Marque como "pago" para manter o controle atualizado"""
 
         
         await update.message.reply_text(help_text, parse_mode='Markdown')
