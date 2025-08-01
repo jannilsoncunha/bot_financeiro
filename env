@@ -1,4 +1,4 @@
-MONGODB_URI=mongodb+srv://jannilsoncunha:<Ja152929>@cluster0.imhiskn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+MONGODB_URI=mongodb+srv://jannilsoncunha:Ja152929@cluster0.imhiskn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 TELEGRAM_BOT_TOKEN=7999941066:AAHfGb-LEIltF8dgJOl2ocskrlGacTuHvzs
 WEBHOOK_URL=https://bot-financeiro-te73.onrender.com
 PORT=
