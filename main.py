@@ -1,3 +1,4 @@
+
 """
 Arquivo principal do Bot de Controle Financeiro
 Integra o bot Telegram com o sistema de notificações e keep-alive
@@ -73,21 +74,8 @@ def main():
         notification_manager.stop_scheduler()
         logger.info("Bot parado com sucesso!")
 
-def run_bot():
-    """
-    Executa o bot de forma compatível com ambientes como Render.
-    """
-    import nest_asyncio
-    nest_asyncio.apply()
-
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        logger.info("Bot interrompido pelo usuário")
-    except Exception as e:
-        logger.error(f"Erro ao executar o bot: {e}")
-
-
 
 if __name__ == '__main__':
-    run_bot()
+    main()
+
+

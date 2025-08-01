@@ -303,20 +303,24 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
     
     async def despesa_parcelas(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Recebe o número de parcelas."""
+        texto = update.message.text.strip()
+        if not texto:
+            await update.message.reply_text(
+                "❌ Número de parcelas não pode ser vazio! Digite um número inteiro positivo.\n"
+                "Exemplo: 12"
+            )
+            return DESPESA_PARCELAS
         try:
-            parcelas = int(update.message.text)
+            parcelas = int(texto)
             if parcelas <= 0:
                 raise ValueError("Número de parcelas deve ser positivo")
-            
             context.user_data['despesa_parcelas'] = parcelas
-            
             await update.message.reply_text(
                 f"Parcelas: *{parcelas}x*\n\n"
                 "Qual o valor de cada parcela? (apenas números)",
                 parse_mode='Markdown'
             )
             return DESPESA_VALOR_PARCELA
-            
         except ValueError:
             await update.message.reply_text(
                 "❌ Número de parcelas inválido! Digite um número inteiro positivo.\n"
@@ -419,41 +423,66 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
             if t.get('due_date'):
                 mensagem += f"📅 Venc: {t['due_date'].strftime('%d/%m/%Y')}\n"
             
-            if t.get('is_installment') and t.get('installment_details'):
-                details = t['installment_details']
-                mensagem += (
-                    f"💳 {details['current_installment']}/{details['total_installments']} "
-                    f"(R$ {details['installment_value']:.2f})\n"
-                )
-            
             mensagem += "\n"
         
         await update.message.reply_text(mensagem, parse_mode='Markdown')
     
     async def pagar_despesa(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Marca uma despesa como paga."""
-        if not context.args:
-            await update.message.reply_text(
-                "❌ Use: /pagar <ID_da_transacao>\n"
-                "Exemplo: /pagar 507f1f77bcf86cd799439011\n\n"
-                "Use /listar para ver os IDs das suas transações."
-            )
-            return
+        """Inicia o processo de marcar despesa como paga."""
+        args = context.args
         
-        transaction_id = context.args[0]
-        context.user_data['pagar_id'] = transaction_id
+        if not args:
+            await update.message.reply_text(
+                "💰 Para marcar uma despesa como paga, use:\n"
+                "/pagar <ID_da_despesa>\n\n"
+                "Exemplo: /pagar 507f1f77bcf86cd799439011\n\n"
+                "Use /listar para ver os IDs das suas despesas."
+            )
+            return ConversationHandler.END
+        
+        transaction_id = args[0]
+        
+        # Verifica se a transação existe e pertence ao usuário
+        user_id = update.effective_user.id
+        transacao = self.db.get_transaction_by_id(transaction_id, user_id)
+        
+        if not transacao:
+            await update.message.reply_text(
+                "❌ Transação não encontrada ou não pertence a você.\n"
+                "Verifique o ID e tente novamente."
+            )
+            return ConversationHandler.END
+        
+        if transacao['type'] != 'despesa':
+            await update.message.reply_text(
+                "❌ Esta transação não é uma despesa.\n"
+                "Apenas despesas podem ser marcadas como pagas."
+            )
+            return ConversationHandler.END
+        
+        if transacao['status'] == 'pago':
+            await update.message.reply_text(
+                "✅ Esta despesa já está marcada como paga!"
+            )
+            return ConversationHandler.END
+        
+        # Armazena o ID da transação para uso posterior
+        context.user_data['transaction_id'] = transaction_id
+        context.user_data['transaction'] = transacao
         
         await update.message.reply_text(
             f"💰 *Marcar como Pago*\n\n"
-            f"ID: `{transaction_id}`\n\n"
-            "Qual a data de pagamento? (DD/MM/AAAA)\n"
+            f"💸 {transacao['category']}\n"
+            f"📝 {transacao['description']}\n"
+            f"💰 R$ {transacao['value']:.2f}\n\n"
+            "Qual a data do pagamento? (DD/MM/AAAA)\n"
             "Ou digite 'hoje' para a data atual:",
             parse_mode='Markdown'
         )
         return PAGAR_DATA
     
     async def pagar_data(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Recebe a data de pagamento e atualiza a transação."""
+        """Recebe a data de pagamento e finaliza o processo."""
         try:
             data_texto = update.message.text.lower()
             
@@ -462,24 +491,28 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
             else:
                 data_pagamento = datetime.strptime(data_texto, '%d/%m/%Y').date()
             
-            transaction_id = context.user_data['pagar_id']
+            # Marca a despesa como paga
+            transaction_id = context.user_data['transaction_id']
+            user_id = update.effective_user.id
             
-            sucesso = self.db.update_transaction_status(
-                transaction_id, "pago", data_pagamento
-            )
+            sucesso = self.db.mark_as_paid(transaction_id, user_id, data_pagamento)
             
             if sucesso:
+                transacao = context.user_data['transaction']
                 await update.message.reply_text(
                     "✅ *Despesa marcada como paga!*\n\n"
-                    f"🆔 ID: `{transaction_id}`\n"
-                    f"📅 Data de pagamento: {data_pagamento.strftime('%d/%m/%Y')}",
+                    f"💸 {transacao['category']}\n"
+                    f"📝 {transacao['description']}\n"
+                    f"💰 R$ {transacao['value']:.2f}\n"
+                    f"📅 Pago em: {data_pagamento.strftime('%d/%m/%Y')}",
                     parse_mode='Markdown'
                 )
             else:
                 await update.message.reply_text(
-                    "❌ Erro ao atualizar transação. Verifique o ID e tente novamente."
+                    "❌ Erro ao marcar despesa como paga. Tente novamente."
                 )
             
+            # Limpa os dados temporários
             context.user_data.clear()
             return ConversationHandler.END
             
@@ -491,9 +524,9 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
             return PAGAR_DATA
     
     async def categorias(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Mostra as categorias do usuário."""
+        """Lista as categorias do usuário."""
         user_id = update.effective_user.id
-        categorias = self.db.get_categories(user_id)
+        categorias = self.db.get_user_categories(user_id)
         
         mensagem = "🏷️ *Suas Categorias:*\n\n"
         
@@ -597,6 +630,4 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
         application.add_handler(pagar_handler)
         
         return application
-
-
 
