@@ -21,7 +21,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-async def main():
+def main():
     """
     Função principal que executa o bot, sistema de notificações e keep-alive.
     """
@@ -46,9 +46,6 @@ async def main():
     bot_manager = FinanceBotManager()
     application = bot_manager.create_application()
 
-    # Inicia keep-alive em background (opcional)
-    keep_alive_task = asyncio.create_task(start_keep_alive())
-
     # Configuração do webhook
     webhook_url = os.getenv('WEBHOOK_URL')
     port_str = os.getenv('PORT')
@@ -64,7 +61,7 @@ async def main():
 
     try:
         logger.info(f"Iniciando bot em modo webhook na porta {port}...")
-        await application.run_webhook(
+        application.run_webhook(
             listen="0.0.0.0",
             port=port,
             webhook_url=webhook_url,
@@ -73,8 +70,6 @@ async def main():
     except KeyboardInterrupt:
         logger.info("Parando o bot...")
     finally:
-        stop_keep_alive()
-        keep_alive_task.cancel()
         notification_manager.stop_scheduler()
         logger.info("Bot parado com sucesso!")
 
@@ -83,7 +78,7 @@ def run_bot():
     Executa o bot de forma compatível com ambientes como Render.
     """
     try:
-        asyncio.run(main())
+        main()
     except KeyboardInterrupt:
         logger.info("Bot interrompido pelo usuário")
     except Exception as e:
