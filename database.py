@@ -98,10 +98,7 @@ class DatabaseManager:
             ID da transação criada
         """
         try:
-            if due_date and isinstance(due_date, date) and not isinstance(due_date, datetime):
-    due_date = datetime.combine(due_date, datetime.min.time())
-
-transaction_data = {
+            transaction_data = {
                 "user_id": user_id,
                 "type": transaction_type,
                 "category": category,
@@ -171,10 +168,7 @@ transaction_data = {
             True se atualizado com sucesso
         """
         try:
-            if payment_date and isinstance(payment_date, date) and not isinstance(payment_date, datetime):
-    payment_date = datetime.combine(payment_date, datetime.min.time())
-
-update_data = {
+            update_data = {
                 "status": status,
                 "updated_at": datetime.utcnow()
             }
@@ -207,9 +201,7 @@ update_data = {
             from datetime import timedelta
             
             today = date.today()
-    today = datetime.combine(today, datetime.min.time())
             target_date = today + timedelta(days=days_ahead)
-    target_date = datetime.combine(target_date, datetime.min.time())
             
             query = {
                 "type": "despesa",
