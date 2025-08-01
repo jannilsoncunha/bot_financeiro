@@ -87,8 +87,7 @@ def run_bot():
 
     try:
         loop = asyncio.get_event_loop()
-        loop.create_task(main())
-        loop.run_forever()
+        loop.run_until_complete(main())
     except KeyboardInterrupt:
         logger.info("Bot interrompido pelo usuário")
     except Exception as e:
