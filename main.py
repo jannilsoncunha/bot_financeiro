@@ -77,12 +77,16 @@ def run_bot():
     """
     Executa o bot de forma compatível com ambientes como Render.
     """
+    import nest_asyncio
+    nest_asyncio.apply()
+
     try:
-        main()
+        asyncio.run(main())
     except KeyboardInterrupt:
         logger.info("Bot interrompido pelo usuário")
     except Exception as e:
         logger.error(f"Erro ao executar o bot: {e}")
+
 
 if __name__ == '__main__':
     run_bot()
