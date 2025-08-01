@@ -36,6 +36,11 @@ class FinanceBotManager:
         self.db = DatabaseManager(os.getenv('MONGODB_URI'))
         self.user_data = {}
     
+
+    async def error_handler(self, update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+        logger.error("Exception while handling an update:", exc_info=context.error)
+        if update and isinstance(update, Update) and update.message:
+            await update.message.reply_text("❌ Ocorreu um erro inesperado. Tente novamente mais tarde.")
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Comando /start - Inicia a interação com o bot."""
         user = update.effective_user
@@ -171,7 +176,7 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
                 category=context.user_data['receita_categoria'],
                 description=context.user_data['receita_descricao'],
                 value=context.user_data['receita_valor'],
-                due_date=datetime.combine(data_receita, datetime.min.time())
+                due_date=data_receita
             )
             
             if transaction_id:
@@ -361,7 +366,7 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
             category=context.user_data['despesa_categoria'],
             description=context.user_data['despesa_descricao'],
             value=context.user_data['despesa_valor'],
-            due_date=datetime.combine(context.user_data['despesa_vencimento'], datetime.min.time()),
+            due_date=context.user_data['despesa_vencimento'],
             is_installment=parcelado,
             installment_details=installment_details
         )
@@ -487,9 +492,9 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
             data_texto = update.message.text.lower()
             
             if data_texto == 'hoje':
-                data_pagamento = datetime.combine(date.today(), datetime.min.time())
+                data_pagamento = date.today()
             else:
-                data_pagamento = datetime.strptime(data_texto, '%d/%m/%Y')
+                data_pagamento = datetime.strptime(data_texto, '%d/%m/%Y').date()
             
             # Marca a despesa como paga
             transaction_id = context.user_data['transaction_id']
@@ -629,5 +634,6 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
         application.add_handler(despesa_handler)
         application.add_handler(pagar_handler)
         
+    application.add_error_handler(self.error_handler)
         return application
 
