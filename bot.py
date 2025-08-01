@@ -161,7 +161,7 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
             if data_texto == 'hoje':
                 data_receita = date.today()
             else:
-                data_receita = datetime.strptime(data_texto, '%d/%m/%Y').date()
+                data_receita = datetime.strptime(data_texto, '%d/%m/%Y').date().isoformat()
             
             # Registra a receita no banco
             user_id = update.effective_user.id
@@ -259,7 +259,7 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
             if data_texto == 'hoje':
                 data_vencimento = date.today()
             else:
-                data_vencimento = datetime.strptime(data_texto, '%d/%m/%Y').date()
+                data_vencimento = datetime.strptime(data_texto, '%d/%m/%Y').date().isoformat()
             
             context.user_data['despesa_vencimento'] = data_vencimento
             
@@ -629,5 +629,5 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
         application.add_handler(despesa_handler)
         application.add_handler(pagar_handler)
         
-        return application"""
+        return application
 
