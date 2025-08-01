@@ -171,7 +171,7 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
                 category=context.user_data['receita_categoria'],
                 description=context.user_data['receita_descricao'],
                 value=context.user_data['receita_valor'],
-                due_date=data_receita
+                due_date=data_receita.isoformat()
             )
             
             if transaction_id:
@@ -361,7 +361,7 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
             category=context.user_data['despesa_categoria'],
             description=context.user_data['despesa_descricao'],
             value=context.user_data['despesa_valor'],
-            due_date=context.user_data['despesa_vencimento'],
+            due_date=context.user_data['despesa_vencimento'].isoformat(),
             is_installment=parcelado,
             installment_details=installment_details
         )
@@ -487,9 +487,9 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
             data_texto = update.message.text.lower()
             
             if data_texto == 'hoje':
-                data_pagamento = date.today()
+                data_pagamento = date.today().isoformat()
             else:
-                data_pagamento = datetime.strptime(data_texto, '%d/%m/%Y').date()
+                data_pagamento = datetime.strptime(data_texto, '%d/%m/%Y').date().isoformat()
             
             # Marca a despesa como paga
             transaction_id = context.user_data['transaction_id']
