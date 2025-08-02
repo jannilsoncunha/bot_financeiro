@@ -26,8 +26,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Estados da conversa
-(RECEITA_CATEGORIA, RECEITA_SUBCATEGORIA, RECEITA_DESCRICAO, RECEITA_VALOR, RECEITA_DATA,
- DESPESA_CATEGORIA, DESPESA_SUBCATEGORIA, DESPESA_DESCRICAO, DESPESA_VALOR, DESPESA_VENCIMENTO,
+(RECEITA_CATEGORIA, RECEITA_DESCRICAO, RECEITA_VALOR, RECEITA_DATA,
+ DESPESA_CATEGORIA, DESPESA_DESCRICAO, DESPESA_VALOR, DESPESA_VENCIMENTO,
  DESPESA_PARCELAMENTO, DESPESA_PARCELAS, DESPESA_VALOR_PARCELA,
  PAGAR_DATA) = range(12)
 
@@ -111,23 +111,13 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
             parse_mode='Markdown'
         )
         return RECEITA_CATEGORIA
-
-    async def receita_subcategoria(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Recebe a subcategoria da receita."""
-        context.user_data['receita_subcategoria'] = update.message.text
-        await update.message.reply_text(
-            f"Subcategoria: *{update.message.text}*\n\n"
-            "Agora, digite uma subcategoria para esta receita:",
-            parse_mode='Markdown'
-        )
-        return RECEITA_DESCRICAO
     
     async def receita_categoria(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Recebe a categoria da receita."""
         context.user_data['receita_categoria'] = update.message.text
         await update.message.reply_text(
             f"Categoria: *{update.message.text}*\n\n"
-            "Agora, digite uma subcategoria para esta receita:",
+            "Agora, digite uma descrição para esta receita:",
             parse_mode='Markdown'
         )
         return RECEITA_DESCRICAO
@@ -180,7 +170,6 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
                 transaction_type="receita",
                 category=context.user_data['receita_categoria'],
                 description=context.user_data['receita_descricao'],
-    subcategory=context.user_data.get('receita_subcategoria', ''),
                 value=context.user_data['receita_valor'],
                 due_date=data_receita.isoformat()
             )
@@ -220,23 +209,13 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
             parse_mode='Markdown'
         )
         return DESPESA_CATEGORIA
-
-    async def despesa_subcategoria(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Recebe a subcategoria da despesa."""
-        context.user_data['despesa_subcategoria'] = update.message.text
-        await update.message.reply_text(
-            f"Subcategoria: *{update.message.text}*\n\n"
-            "Agora, digite uma subcategoria para esta despesa:",
-            parse_mode='Markdown'
-        )
-        return DESPESA_DESCRICAO
     
     async def despesa_categoria(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Recebe a categoria da despesa."""
         context.user_data['despesa_categoria'] = update.message.text
         await update.message.reply_text(
             f"Categoria: *{update.message.text}*\n\n"
-            "Agora, digite uma subcategoria para esta despesa:",
+            "Agora, digite uma descrição para esta despesa:",
             parse_mode='Markdown'
         )
         return DESPESA_DESCRICAO
@@ -381,7 +360,6 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
             transaction_type="despesa",
             category=context.user_data['despesa_categoria'],
             description=context.user_data['despesa_descricao'],
-    subcategory=context.user_data.get('despesa_subcategoria', ''),
             value=context.user_data['despesa_valor'],
             due_date=context.user_data['despesa_vencimento'].isoformat(),
             is_installment=parcelado,
@@ -405,13 +383,7 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
             
             mensagem += f"🆔 ID: `{transaction_id}`"
             
-            if subcategorias:
-            mensagem += "\n\n📂 *Resumo por Subcategoria:*\n"
-            for tipo, dados in subcategorias.items():
-                mensagem += f"\n🔹 {tipo.capitalize()}\n"
-                for subcat, valor in dados.items():
-                    mensagem += f"• {subcat}: R$ {valor:.2f}\n"
-        await update.message.reply_text(mensagem, parse_mode='Markdown')
+            await update.message.reply_text(mensagem, parse_mode='Markdown')
         else:
             await update.message.reply_text(
                 "❌ Erro ao registrar despesa. Tente novamente."
@@ -433,7 +405,7 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
                 "📋 Você ainda não possui transações registradas.\n"
                 "Use /receita ou /despesa para começar!"
             )
-            return
+    return
         
         mensagem = "📋 *Suas Últimas Transações:*\n\n"
         
@@ -453,12 +425,6 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
             
             mensagem += "\n"
         
-        if subcategorias:
-            mensagem += "\n\n📂 *Resumo por Subcategoria:*\n"
-            for tipo, dados in subcategorias.items():
-                mensagem += f"\n🔹 {tipo.capitalize()}\n"
-                for subcat, valor in dados.items():
-                    mensagem += f"• {subcat}: R$ {valor:.2f}\n"
         await update.message.reply_text(mensagem, parse_mode='Markdown')
     
     async def pagar_despesa(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -578,12 +544,6 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
         if not categorias['receitas'] and not categorias['despesas']:
             mensagem = "🏷️ Você ainda não possui categorias.\nRegistre algumas transações primeiro!"
         
-        if subcategorias:
-            mensagem += "\n\n📂 *Resumo por Subcategoria:*\n"
-            for tipo, dados in subcategorias.items():
-                mensagem += f"\n🔹 {tipo.capitalize()}\n"
-                for subcat, valor in dados.items():
-                    mensagem += f"• {subcat}: R$ {valor:.2f}\n"
         await update.message.reply_text(mensagem, parse_mode='Markdown')
     
     async def relatorio(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -592,7 +552,6 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
         hoje = date.today()
         
         resumo = self.db.get_monthly_summary(user_id, hoje.year, hoje.month)
-        subcategorias = self.db.get_monthly_subcategory_summary(user_id, hoje.year, hoje.month)
         
         mensagem = (
             f"📊 *Relatório - {hoje.strftime('%B/%Y')}*\n\n"
@@ -609,12 +568,6 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
         else:
             mensagem += "⚖️ Suas receitas e despesas estão equilibradas."
         
-        if subcategorias:
-            mensagem += "\n\n📂 *Resumo por Subcategoria:*\n"
-            for tipo, dados in subcategorias.items():
-                mensagem += f"\n🔹 {tipo.capitalize()}\n"
-                for subcat, valor in dados.items():
-                    mensagem += f"• {subcat}: R$ {valor:.2f}\n"
         await update.message.reply_text(mensagem, parse_mode='Markdown')
     
     async def cancel(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -641,7 +594,6 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
             entry_points=[CommandHandler("receita", self.receita_start)],
             states={
                 RECEITA_CATEGORIA: [MessageHandler(filters.TEXT & ~filters.COMMAND, self.receita_categoria)],
-            RECEITA_SUBCATEGORIA: [MessageHandler(filters.TEXT & ~filters.COMMAND, self.receita_subcategoria)],
                 RECEITA_DESCRICAO: [MessageHandler(filters.TEXT & ~filters.COMMAND, self.receita_descricao)],
                 RECEITA_VALOR: [MessageHandler(filters.TEXT & ~filters.COMMAND, self.receita_valor)],
                 RECEITA_DATA: [MessageHandler(filters.TEXT & ~filters.COMMAND, self.receita_data)],
@@ -654,7 +606,6 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
             entry_points=[CommandHandler("despesa", self.despesa_start)],
             states={
                 DESPESA_CATEGORIA: [MessageHandler(filters.TEXT & ~filters.COMMAND, self.despesa_categoria)],
-            DESPESA_SUBCATEGORIA: [MessageHandler(filters.TEXT & ~filters.COMMAND, self.despesa_subcategoria)],
                 DESPESA_DESCRICAO: [MessageHandler(filters.TEXT & ~filters.COMMAND, self.despesa_descricao)],
                 DESPESA_VALOR: [MessageHandler(filters.TEXT & ~filters.COMMAND, self.despesa_valor)],
                 DESPESA_VENCIMENTO: [MessageHandler(filters.TEXT & ~filters.COMMAND, self.despesa_vencimento)],
