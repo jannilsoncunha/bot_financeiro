@@ -85,10 +85,6 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
 
 🏷️ */categorias* - Mostra suas categorias
 
-📅 */help* - Exibe esta mensagem de ajuda
-
-
-
 📊 */relatorio* - Relatório mensal atual
 
 *Funcionalidades:*
@@ -97,9 +93,6 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
 • 💳 Suporte a parcelamentos
 • 📊 Relatórios mensais
 • 🏷️ Categorização automática
-• ✅ Alteração
-• ✅ Exclusão
-• ✅ Subcategorias
 
 *Dicas:*
 • Use categorias consistentes para melhor organização
