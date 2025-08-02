@@ -578,7 +578,18 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
         )
         return ConversationHandler.END
     
-    def create_application(self):
+    
+async def editar(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Função de edição ainda não implementada.")
+    return ConversationHandler.END
+
+
+async def excluir(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Função de exclusão ainda não implementada.")
+    return ConversationHandler.END
+
+
+def create_application(self):
         """Cria e configura a aplicação do bot."""
         application = Application.builder().token(os.getenv('TELEGRAM_BOT_TOKEN')).build()
         
@@ -588,6 +599,10 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
         application.add_handler(CommandHandler("listar", self.listar_transacoes))
         application.add_handler(CommandHandler("categorias", self.categorias))
         application.add_handler(CommandHandler("relatorio", self.relatorio))
+
+application.add_handler(CommandHandler("editar", self.editar))
+application.add_handler(CommandHandler("excluir", self.excluir))
+
         
         # Conversation Handler para receitas
         receita_handler = ConversationHandler(
