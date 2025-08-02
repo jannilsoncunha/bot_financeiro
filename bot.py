@@ -405,7 +405,7 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
                 "📋 Você ainda não possui transações registradas.\n"
                 "Use /receita ou /despesa para começar!"
             )
-    return
+            return
         
         mensagem = "📋 *Suas Últimas Transações:*\n\n"
         
