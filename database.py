@@ -241,7 +241,50 @@ class DatabaseManager:
             logger.error(f"Erro ao buscar categorias: {e}")
             return {"receitas": [], "despesas": []}
     
-    def get_monthly_summary(self, user_id: int, year: int, month: int) -> Dict:
+    
+    def update_transaction(self, transaction_id: str, user_id: int, updates: dict) -> bool:
+        """
+        Atualiza os campos de uma transação específica.
+
+        Args:
+            transaction_id: ID da transação
+            user_id: ID do usuário
+            updates: Dicionário com os campos a serem atualizados
+
+        Returns:
+            True se a transação foi atualizada com sucesso, False caso contrário
+        """
+        try:
+            result = self.transactions.update_one(
+                {"_id": ObjectId(transaction_id), "user_id": user_id},
+                {"$set": updates}
+            )
+            return result.modified_count > 0
+        except Exception as e:
+            logger.error(f"Erro ao atualizar transação: {e}")
+            return False
+
+    def delete_transaction(self, transaction_id: str, user_id: int) -> bool:
+        """
+        Exclui uma transação específica.
+
+        Args:
+            transaction_id: ID da transação
+            user_id: ID do usuário
+
+        Returns:
+            True se a transação foi excluída com sucesso, False caso contrário
+        """
+        try:
+            result = self.transactions.delete_one(
+                {"_id": ObjectId(transaction_id), "user_id": user_id}
+            )
+            return result.deleted_count > 0
+        except Exception as e:
+            logger.error(f"Erro ao excluir transação: {e}")
+            return False
+
+def get_monthly_summary(self, user_id: int, year: int, month: int) -> Dict:
         """
         Gera resumo mensal das transações.
         

@@ -579,14 +579,87 @@ Para começar, use /receita para registrar uma receita ou /despesa para registra
         return ConversationHandler.END
     
     
-async def editar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Função de edição ainda não implementada.")
-    return ConversationHandler.END
+async def editar(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        args = context.args
+        if not args:
+            await update.message.reply_text("❌ Para editar uma transação, use:\n/editar <ID_da_transação>")
+            return ConversationHandler.END
+
+        transaction_id = args[0]
+        user_id = update.effective_user.id
+        transacao = self.db.get_transaction_by_id(transaction_id, user_id)
+
+        if not transacao:
+            await update.message.reply_text("❌ Transação não encontrada ou não pertence a você.")
+            return ConversationHandler.END
+
+        context.user_data['editar_id'] = transaction_id
+        context.user_data['transacao'] = transacao
+
+        await update.message.reply_text(
+            "✏️ Digite os novos dados no formato:\n"
+            "categoria | descrição | valor | data (DD/MM/AAAA)\n"
+            "Ou digite 'cancelar' para abortar."
+        )
+        return 1001
+
+    async def editar_id(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        texto = update.message.text.strip()
+        if texto.lower() == 'cancelar':
+            await update.message.reply_text("❌ Edição cancelada.")
+            return ConversationHandler.END
+
+        partes = texto.split('|')
+        if len(partes) != 4:
+            await update.message.reply_text("❗ Formato inválido. Use:\ncategoria | descrição | valor | data (DD/MM/AAAA)")
+            return 1001
+
+        categoria, descricao, valor_str, data_str = [p.strip() for p in partes]
+        try:
+            valor = float(valor_str.replace(',', '.'))
+            data = datetime.strptime(data_str, '%d/%m/%Y').date().isoformat()
+        except ValueError:
+            await update.message.reply_text("❗ Valor ou data inválidos. Tente novamente.")
+            return 1001
+
+        transaction_id = context.user_data['editar_id']
+        user_id = update.effective_user.id
+
+        sucesso = self.db.update_transaction(transaction_id, user_id, {
+            "category": categoria,
+            "description": descricao,
+            "value": valor,
+            "due_date": data
+        })
+
+        if sucesso:
+            await update.message.reply_text("✅ Transação atualizada com sucesso!")
+        else:
+            await update.message.reply_text("❌ Erro ao atualizar transação.")
+        context.user_data.clear()
+        return ConversationHandler.END
 
 
-async def excluir(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Função de exclusão ainda não implementada.")
-    return ConversationHandler.END
+async def excluir(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        args = context.args
+        if not args:
+            await update.message.reply_text("❗ Para excluir uma transação, use:\n/excluir <ID_da_transação>")
+            return ConversationHandler.END
+
+        transaction_id = args[0]
+        user_id = update.effective_user.id
+        transacao = self.db.get_transaction_by_id(transaction_id, user_id)
+
+        if not transacao:
+            await update.message.reply_text("❌ Transação não encontrada ou não pertence a você.")
+            return ConversationHandler.END
+
+        sucesso = self.db.delete_transaction(transaction_id, user_id)
+        if sucesso:
+            await update.message.reply_text("🗑️ Transação excluída com sucesso!")
+        else:
+            await update.message.reply_text("❌ Erro ao excluir transação.")
+        return ConversationHandler.END
 
 
 def create_application(self):
@@ -602,6 +675,14 @@ def create_application(self):
 
 application.add_handler(CommandHandler("editar", self.editar))
 application.add_handler(CommandHandler("excluir", self.excluir))
+editar_handler = ConversationHandler(
+        entry_points=[CommandHandler("editar", self.editar)],
+        states={
+            1001: [MessageHandler(filters.TEXT & ~filters.COMMAND, self.editar_id)],
+        },
+        fallbacks=[CommandHandler("cancel", self.cancel)]
+    )
+    application.add_handler(editar_handler)
 
         
         # Conversation Handler para receitas
